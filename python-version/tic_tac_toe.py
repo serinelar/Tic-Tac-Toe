@@ -1,3 +1,5 @@
+import random
+
 def print_board(board):
     for row in board:
         print("|".join(row))
@@ -21,37 +23,72 @@ def check_winner(board, player):
 def check_draw(board):
     return all(cell != " " for row in board for cell in row)
 
+def ai_move(board):
+    # Simple AI: Random move
+    while True:
+        row, col = random.randint(0, 2), random.randint(0, 2)
+        if board[row][col] == " ":
+            return row, col
+
+def get_player_move():
+    while True:
+        try:
+            row, col = map(int, input("Enter your move (row and column, 1-3): ").split())
+        except ValueError:
+            print("Invalid input. Please enter two numbers.")
+            continue
+        if row < 1 or row > 3 or col < 1 or col > 3:
+            print("Please select row and column between 1 and 3.")
+        else:
+            return row - 1, col - 1
+
 def tic_tac_toe():
     # Initialize the board
-    board = [[" " for _ in range(3)] for _ in range(3)]
-    current_player = "X"
+    player_score = 0
+    ai_score = 0
 
     while True:
-        print_board(board)
-        try:
-            row, col = map(int, input(f"Player {current_player}, enter your move (row and column): ").split())
-        except ValueError:
-            print("Invalid input. Please enter two numbers separated by a space.")
-            continue
+        board = [[" " for _ in range(3)] for _ in range(3)]
+        current_player = "X"
 
-        if row < 1 or row > 3 or col < 1 or col > 3 or board[row-1][col-1] != " ":
-            print("Invalid move. Try again.")
-            continue
-
-        board[row-1][col-1] = current_player
-
-        if check_winner(board, current_player):
+        while True:
             print_board(board)
-            print(f"Player {current_player} wins!")
+
+            if current_player == "X":
+                row, col = get_player_move()
+                if board[row][col] != " ":
+                    print("This cell is already taken. Try again.")
+                    continue
+            else:
+                print("AI is making a move...")
+                row, col = ai_move(board)
+
+            board[row][col] = current_player
+
+            if check_winner(board, current_player):
+                print_board(board)
+                if current_player == "X":
+                    print("You win!")
+                    player_score += 1
+                else:
+                    print("AI wins!")
+                    ai_score += 1
+                break
+
+            if check_draw(board):
+                print_board(board)
+                print("It's a draw!")
+                break
+
+            current_player = "O" if current_player == "X" else "X"
+
+        print(f"Scores: Player - {player_score}, AI - {ai_score}")
+        replay = input("Do you want to play again? (y/n): ").lower()
+        if replay != 'y':
+            print("Thanks for playing!")
             break
 
-        if check_draw(board):
-            print_board(board)
-            print("The game is a draw!")
-            break
-
-        # Switch players
-        current_player = "O" if current_player == "X" else "X"
-
+        
+       
 if __name__ == "__main__":
     tic_tac_toe()
